@@ -1,4 +1,5 @@
 # Offensive Bash Scripts
+Collection of bash scripts for Kali
 
 ## gen.sh
 Generates msfvenom binaries with the option to:
