@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# MSFVenom Binary and Resource file Generator Script. Designed to work with Metasploit multi/handler stub.
-# Use non-windows payloads at your own risk.
-# Press Ctrl-C at anytime to exit this script.
+echo MSFVenom Binary and Resource file Generator Script. Designed to work with Metasploit multi/handler stub.
+echo NOT optimized for anything other than windows payloads. Use at your own risk.
+echo Press Ctrl-C at anytime to exit this script.
 
 
 function setpayload {
