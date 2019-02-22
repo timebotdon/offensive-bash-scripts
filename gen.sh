@@ -52,9 +52,10 @@ fi
 
 function setarch {
 # Set Arch
-read -p "Enter Architechure [x86]: " arch
-if [ -z "$arch" ] || [ "$arch" = 'x86' ]
+if [ "$(echo $payload | cut -d"/" -f2)" = 'x64' ]
 	then
+	arch='x64'
+else
 	arch='x86'
 fi
 }
@@ -66,8 +67,16 @@ if [ -z "$enc1" ] || [ "$enc1" = 'no' ]
 	then
 	return
 else
+	echo
 	echo Accepted Encoders:
-	msfvenom --list encoders
+	if [ "$arch" = 'x86' ]
+	then
+		msfvenom --list encoders | grep "x86"
+	elif [ "$arch" = 'x64' ]
+	then
+		msfvenom --list encoders | grep "x64"
+	fi
+	echo
 	read -p "Enter Encoder type: " encoder
 	read -p "Enter Encode Iterations ["1"]: " iterations
 	if [ -z "$iterations" ]
