@@ -1,6 +1,7 @@
-# Offensive Bash Scripts
-Collection of bash scripts for Kali
+# Offensive Scripts
+Collection of offensive scripts for Kali/Windows
 
+# Kali
 ## gen.sh
 Generates Windows-only msfvenom binaries with the options to:
 1. Generate and run a parallel metasploit resource script with the binary
@@ -12,3 +13,8 @@ Generates Windows-only msfvenom binaries with the options to:
 ## nmap.sh
 Nmap scans for quickly doing inital reconnaissance against network targets.
 1. Vulscan
+
+
+# Windows
+## wifirecon.ps1
+Quickly grabs and dumps Wifi profiles and passwords to a local text file on the user's desktop.
