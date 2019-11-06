@@ -9,7 +9,6 @@ Generates Windows-only msfvenom binaries with the options to:
 3. Host the generated binary with php-server
 4. Prepend Migrate
 
-
 ## nmap.sh
 Nmap scans for quickly doing inital reconnaissance against network targets.
 1. Vulscan
