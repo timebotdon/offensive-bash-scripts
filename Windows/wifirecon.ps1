@@ -1,4 +1,4 @@
-# wifi pwn
+# wifirecon
 
 function getWifiConnected {
 	$currentWifi = (Get-NetConnectionProfile).Name
@@ -24,7 +24,6 @@ function getWifiPasswords {
 		}
 	}
 }
-
 
 
 function dumpIt {
