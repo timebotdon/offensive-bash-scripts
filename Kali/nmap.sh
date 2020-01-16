@@ -11,20 +11,26 @@ vulscan=vulscan
 
 
 
-function checkDependency {
+function checkDependencies {
 ## Check Dependencies
 	echo Checking for latest nmap version..
 	apt-get update
 	apt-get install nmap
-	
+
 	echo Checking if Vulscan has been installed.
 	if [ -d "/usr/share/nmap/scripts/vulscan" ]
 		then
 			echo Vulscan exists!
 		else
-			echo Cloning vulscan repo..
-			git clone https://github.com/scipag/vulscan /root/scipag_vulscan
-			ln -s `pwd`/scipag_vulscan /usr/share/nmap/scripts/vulscan
+			read -p "Download vulscan? [Y/n]: " dl_vul
+			if [ -z dl_vul ]
+				then
+					echo Cloning vulscan repo..
+					git clone https://github.com/scipag/vulscan /root/scipag_vulscan
+					ln -s `pwd`/scipag_vulscan /usr/share/nmap/scripts/vulscan
+				else
+					echo Vulscan NOT available.
+			fi
 	fi
 	clear
 }
@@ -33,15 +39,15 @@ function checkDependency {
 
 function pingScan {
 ## Get a list of active hosts with a ping sweep and export to a text file.
-	read -p "Set target address [xxx.xxx.xxx.xxx]: " targ			
+	read -p "Set target address [xxx.xxx.xxx.xxx]: " targ
 	read -p "Set netmask [24]: " netmask
 	if [ -z $netmask ]
 		then
 			netmask='24'
-	fi	
+	fi
 
 	read -p "Any excluded IP addresses? [y/N]: " excludech
-	
+
 	if [ -z $excludech ] || [ $excludech = 'n' ]
 		then
 			nmap -sn $targ/$netmask | grep report | cut -d ' ' -f5 > "$activehosts".txt
@@ -178,13 +184,13 @@ function main {
 			vulScan
 			mainch = ' '
 			main
-	fi	
+	fi
 }
 
 
 
 function init {
-	checkDependency
+	checkDependencies
 	main
 }
 
