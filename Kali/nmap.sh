@@ -143,46 +143,48 @@ function main {
 	echo 5. Nmap Vuln script scan
 	echo 6. Scipag Vulscan script
 
-	if [ $mainch eq '0' ]
+read -p "Scan Type: " mainch
+
+	if [ "$mainch" = '0' ]
 		then
 			pingScan
 			mainch = ' '
 			main
 	fi
-	if [ $mainch eq '1' ]
+	if [ "$mainch" = '1' ]
 		then
 			quickScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
-	if [ $mainch eq '2' ]
+	if [ "$mainch" = '2' ]
 		then
 			allPortScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
-	if [ $mainch eq '3' ]
+	if [ "$mainch" = '3' ]
 		then
 			udpScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
-	if [ $mainch eq '4' ]
+	if [ "$mainch" = '4' ]
 		then
 			allScriptScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
-	if [ $mainch eq '5' ]
+	if [ "$mainch" = '5' ]
 		then
 			nmapVulnScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
-	if [ $mainch = '6' ]
+	if [ "$mainch" = '6' ]
 		then
 			vulScan
-			mainch = ' '
+			mainch= ' '
 			main
 	fi
 }
